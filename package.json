@@ -1,0 +1,29 @@
+{
+  "name": "todolist-backend",
+  "version": "1.0.0",
+  "description": "REST Web Application used to keep list of TODO tasks",
+  "main": "app/server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/german1410/todolist-backend.git"
+  },
+  "keywords": [
+    "todo"
+  ],
+  "author": "german1410@gmail.com",
+  "bugs": {
+    "url": "https://github.com/german1410/todolist-backend/issues"
+  },
+  "homepage": "https://github.com/german1410/todolist-backend#readme",
+  "devDependencies": {
+    "jasmine": "^3.3.0"
+  },
+  "dependencies": {
+    "joi": "^14.0.1",
+    "restify": "^7.2.1",
+    "winston": "^3.1.0"
+  }
+}
