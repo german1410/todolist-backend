@@ -1,0 +1,391 @@
+{
+    "openapi": "",
+    "info": {
+        "title": "ToDo List Service",
+        "version": "0.0.1"
+    },
+    "paths": {
+        "/todo/api/lists": {
+            "post": {
+                "description": "Create a new ToDo list",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ToDoListMeta"
+                            },
+                            "required": [
+                                "name"
+                            ]
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ToDoListMeta"
+                            },
+                            "required": [
+                                "name"
+                            ]
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "List was created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ToDoListMeta"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Provided name is not valid",
+                        "$ref": "#/components/response/GeneralError"
+                    }
+                }
+            }
+        },
+        "/todo/api/lists/{listId}": {
+            "get": {
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/listId"
+                    },
+                    {
+                        "name": "index",
+                        "in": "query",
+                        "description": "Index of the element from which entries are returned",
+                        "schema": {
+                            "type": "number",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "startAt",
+                        "in": "query",
+                        "description": "Id of the ToDo from which result are returned",
+                        "schema": {
+                            "type": "number",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Maximum number of entries to return",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List metadata",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ToDoListMeta"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters"
+                    },
+                    "404": {
+                        "description": "ToDo list no longer exists"
+                    },
+                    "411": {
+                        "desciption": "Limit was not provided on the request"
+                    }
+                }
+            },
+            "delete": {
+                "parameters": [
+                    {
+                      "$ref": "#/components/parameters/listId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "ToDo list deleted"
+                    },
+                    "404": {
+                        "description": "ToDo list no longer exists"
+                    }
+                }
+            }
+        },
+        "/todo/api/lists/{listId}/todos": {
+            "get": {
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/listId"
+                    },
+                    {
+                        "name": "index",
+                        "in": "query",
+                        "description": "Index of the element from which entries are returned",
+                        "schema": {
+                            "type": "number",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "startAt",
+                        "in": "query",
+                        "description": "Id of the ToDo from which result are returned",
+                        "schema": {
+                            "type": "number",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Maximum number of entries to return",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of ToDo entries for the ToDo list",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ToDoListContent"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters",
+                        "$ref": "#/components/response/GeneralError"
+                    },
+                    "404": {
+                        "description": "ToDo list no longer exists"
+                    },
+                    "411": {
+                        "desciption": "Limit was not provided on the request"
+                    }
+                }
+            },
+            "post": {
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/listId"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ToDoEntry"
+                            },
+                            "required": [
+                                "description"
+                            ]
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ToDoEntry"
+                            },
+                            "required": [
+                                "description"
+                            ]
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "ToDo Entry added to the list",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ToDoEntry"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Provided entry is invalid",
+                        "$ref": "#/components/response/GeneralError"
+                    },
+                    "404": {
+                        "description": "ToDo list no longer exists",
+                        "$ref": "#/components/response/GeneralError"
+                    }
+                }
+            }
+        },
+        "/todo/api/lists/{listId}/todos/{todoId}": {
+            "patch": {
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/listId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/todoId"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ToDoEntry"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ToDoEntry"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "ToDo Entry updated"
+                    },
+                    "400": {
+                        "description": "Provided entry is invalid",
+                        "$ref": "#/components/response/GeneralError"
+                    },
+                    "404": {
+                        "description": "ToDo list or ToDo entry no longer exists",
+                        "$ref": "#/components/response/GeneralError"
+                    }
+                }
+            }, 
+            "delete": {
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/listId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/todoId"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "ToDo Entry updated"
+                    },
+                    "400": {
+                        "description": "Provided entry is invalid",
+                        "$ref": "#/components/response/GeneralError"
+                    },
+                    "404": {
+                        "description": "ToDo list or ToDo entry no longer exists",
+                        "$ref": "#/components/response/GeneralError"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "parameters": {
+            "listId": {
+                "name": "listId",
+                "in": "path",
+                "description": "ID of the list",
+                "required": true,
+                "schema": {
+                    "type": "number",
+                    "format": "int64"
+                }
+            },
+            "todoId": {
+                "name": "todoId",
+                "in": "path",
+                "description": "ID of a ToDo entry inside a ToDo",
+                "required": true,
+                "schema": {
+                    "type": "number",
+                    "format": "int64"
+                }
+            }
+        },
+        "schemas": {
+            "ToDoListMeta": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    }
+                }
+            },
+            "ToDoEntry": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number",
+                        "format": "int64"
+                    },
+                    "state": {
+                        "type": "number",
+                        "format": "int32",
+                        "enum": ["incomplete", "complete"]
+                    },
+                    "description": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000
+                    },
+                    "due_date": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                }
+            },
+            "ToDoListContent": {
+                "type": "object",
+                "properties": {
+                    "metadata": {
+                        "$ref": "#/components/schemas/ToDoListMeta"
+                    },
+                    "todos": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ToDoEntry"
+                        }
+                    }
+                }
+            }
+        },
+        "responses": {
+            "GeneralError": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                           "type": "object",
+                           "properties": {
+                               "code": {
+                                   "type": "number",
+                                   "format": "int32"
+                               },
+                               "error": {
+                                   "type": "string"
+                               }
+                           }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
