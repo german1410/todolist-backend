@@ -349,6 +349,14 @@
                     "due_date": {
                         "type": "integer",
                         "format": "int64"
+                    },
+                    "creation_date": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "last_update_date": {
+                        "type": "integer",
+                        "format": "int64"
                     }
                 }
             },
@@ -374,13 +382,16 @@
                         "schema": {
                            "type": "object",
                            "properties": {
-                               "code": {
+                               "error": {
                                    "type": "number",
                                    "format": "int32"
                                },
-                               "error": {
+                               "message": {
                                    "type": "string"
-                               }
+                               },
+                               "additionalInfo": {
+                                "type": "string"
+                            }
                            }
                         }
                     }
