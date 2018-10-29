@@ -4,7 +4,7 @@
   "description": "REST Web Application used to keep list of TODO tasks",
   "main": "app/server.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --exit --require test/env --reporter spec --bail test/**/**.spec.js"
   },
   "repository": {
     "type": "git",
@@ -19,11 +19,13 @@
   },
   "homepage": "https://github.com/german1410/todolist-backend#readme",
   "devDependencies": {
+    "chai": "^4.2.0",
+    "hippie": "^0.5.2",
     "mocha": "^5.2.0"
   },
   "dependencies": {
     "joi": "^14.0.1",
-    "loadash": "^1.0.0",
+    "lodash": "^4.17.11",
     "mongoose": "^5.3.7",
     "restify": "^7.2.1",
     "winston": "^3.1.0"
