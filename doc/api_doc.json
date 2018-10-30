@@ -52,34 +52,6 @@
                 "parameters": [
                     {
                         "$ref": "#/components/parameters/listId"
-                    },
-                    {
-                        "name": "index",
-                        "in": "query",
-                        "description": "Index of the element from which entries are returned",
-                        "schema": {
-                            "type": "number",
-                            "format": "int32"
-                        }
-                    },
-                    {
-                        "name": "startAt",
-                        "in": "query",
-                        "description": "Id of the ToDo from which result are returned",
-                        "schema": {
-                            "type": "number",
-                            "format": "int32"
-                        }
-                    },
-                    {
-                        "name": "limit",
-                        "in": "query",
-                        "description": "Maximum number of entries to return",
-                        "required": true,
-                        "schema": {
-                            "type": "number",
-                            "format": "int32"
-                        }
                     }
                 ],
                 "responses": {
@@ -98,9 +70,6 @@
                     },
                     "404": {
                         "description": "ToDo list no longer exists"
-                    },
-                    "411": {
-                        "desciption": "Limit was not provided on the request"
                     }
                 }
             },
