@@ -35,7 +35,7 @@ function createList(server, listName) {
                 .send({
                   name: listName
                 })
-                .expectStatus(200)
+                .expectStatus(201)
                 .end()
                   .then(function (response) {
                     let parsedBody = JSON.parse(response.body);
@@ -184,6 +184,52 @@ describe('/todo/api/lists/:listId', function () {
                       let listFound = JSON.parse(response.body);
                       expect(listFound).to.be.deep.equal(storedList);
                       done();
+                    })
+                    .catch(done);
+        })
+        .catch(done);
+    });
+  });
+
+
+  describe('delete', function() {
+    it('should pass if list does not exist', function(done) {
+      hippie(server)
+        .json()
+        .del('/todo/api/lists/1')
+        .expectStatus(204)
+        .end(done);
+    });
+
+    it('should fail if list id is not a number', function(done) {
+      hippie(server)
+        .json()
+        .del('/todo/api/lists/InvalidId')
+        .expectStatus(400)
+        .end(function(error, response) {
+          if (error) {
+            done(error);
+          } else {
+            expect(JSON.parse(response.body)).to.include(errors.IdNotAcceptable);
+            done();
+          }
+        });
+    });
+
+    it('should delete the list with that id', function(done){
+      createList(server, 'test list')
+        .then(function(storedList) {
+            hippie(server)
+                  .json()
+                  .del('/todo/api/lists/' + storedList.id)
+                  .expectStatus(204)
+                  .end()
+                    .then(function() {
+                      hippie(server)
+                        .json()
+                        .get('/todo/api/lists/' + storedList.id)
+                        .expectStatus(404)
+                        .end(done);
                     })
                     .catch(done);
         })
