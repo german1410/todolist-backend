@@ -26,6 +26,10 @@ class TodoListDao {
   findById(id) {
     return todoList.findOne({ id: id});
   }
+
+  deleteById(id) {
+    return todoList.deleteOne({ id: id});
+  }
 }
 
 module.exports = new TodoListDao();
