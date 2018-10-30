@@ -41,8 +41,7 @@ async function getList(request, response, next) {
   if (validationResult.error) {
     let error = validationResult.error;
     logger.debug('getList - validation error: %j', error);
-    let errorResponse = createInvalidListIdError(error);
-    return next(new BadRequestError(errorResponse));
+    return next(createInvalidListIdError(error));
   } 
   
   logger.debug('getList - for list with id: %d', listId);
@@ -68,14 +67,15 @@ async function deleteList(request, response, next) {
   if (validationResult.error) {
     let error = validationResult.error;
     logger.debug('deleteList - validation error: %j', error);
-    let errorResponse = createInvalidListIdError(error);
-    return next(new BadRequestError(errorResponse));
+    return next(createInvalidListIdError(error));
   } 
 
-  logger.debug('deleteList - for list with id: %d', listId);
+  logger.debug('deleteList - trying to delete list with id: %d', listId);
   try {
     await todoListDao.deleteById(listId);
+    logger.debug('deleteList - list deleted with id: %d', listId);
     response.status(204);
+    response.send();
     return next();
   } catch (error) {
     logger.error('Error trying to delete list: %s', error);
