@@ -17,7 +17,7 @@ function configureRoutes(server) {
   server.post('/todo/api/lists/:listId/todos', todoEntryController.createTodo);
   server.get('/todo/api/lists/:listId/todos', todoEntryController.getTodos);
   server.get('/todo/api/lists/:listId/todos/:todoId', todoEntryController.getTodo);
-  server.patch('/todo/api/lists/:listId/todos/:todoId', todoEntryController.updateTodo);
+  //server.patch('/todo/api/lists/:listId/todos/:todoId', todoEntryController.updateTodo);
   server.del('/todo/api/lists/:listId/todos/:todoId', todoEntryController.deleteTodo);
 }
 
