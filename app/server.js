@@ -37,4 +37,17 @@ mongoose.connection.on('connected', function(error) {
 
 server.listen(config.service.port);
 
+// Handle shutdown gracefully
+process.on('SIGTERM', () => {
+  logger.info('Stoping server');
+  server.close(() => {
+    logger.info('Http server stopped.');
+    // boolean means [force], see in mongoose doc
+    mongoose.connection.close(false, () => {
+      logger.info('DB connection closed.');
+      process.exit(0);
+    });
+  });
+});
+
 module.exports = server
