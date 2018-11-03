@@ -1,61 +1,15 @@
 'use strict';
 
-const mongoose = require('mongoose');
 const expect = require('chai').expect;
 const hippie = require('hippie');
 
 const errors = require('../../app/model/errors');
-const config = require('../../app/config/todo-service-config');
 const server = require('../../app/server');
-
-async function dropCollection(collectionName) {
-  return new Promise(function (resolve, reject) {
-    mongoose.connection.db.listCollections({name: collectionName})
-                          .next(function(err, collinfo) {
-                              if (err) {
-                                reject(err);
-                              }
-
-                              if (collinfo) {
-                                return mongoose.connection.dropCollection(collectionName)
-                                                          .then(resolve, reject);
-                              } else {
-                                resolve();
-                              }
-                          });
-  });
-
-}
-
-function createList(server, listName) {
-  return new Promise(function(resolve, reject) {
-        hippie(server)
-                .json()
-                .post('/todo/api/lists')
-                .send({
-                  name: listName
-                })
-                .expectStatus(201)
-                .end()
-                  .then(function (response) {
-                    let parsedBody = JSON.parse(response.body);
-                    resolve(parsedBody);
-                  })
-                  .catch(reject);
-   });
-}
+const {cleanUpDb, createList} = require('./integration-test-utils');
 
 describe('/todo/api/lists', function () { 
   this.timeout(5000);
-  beforeEach(async function () {
-    try {
-      await mongoose.connect(config.db.url);
-      await dropCollection('todo_lists');
-      await dropCollection('todo_list_counters');
-    } catch (error) {
-      throw error;
-    }
-  });
+  beforeEach(cleanUpDb);
 
   describe('post', function () {
     it('should fail due to missing name', function(done) {
@@ -132,15 +86,7 @@ describe('/todo/api/lists', function () {
 
 describe('/todo/api/lists/:listId', function () { 
   this.timeout(5000);
-  beforeEach(async function () {
-    try {
-      await mongoose.connect(config.db.url);
-      await dropCollection('todo_lists');
-      await dropCollection('todo_list_counters');
-    } catch (error) {
-      throw error;
-    }
-  });
+  beforeEach(cleanUpDb);
 
   describe('get', function() {
     it('should fail if list does not exist', function(done) {
@@ -148,92 +94,65 @@ describe('/todo/api/lists/:listId', function () {
         .json()
         .get('/todo/api/lists/1')
         .expectStatus(404)
-        .end(function(error) {
-          if (error) {
-            done(error);
-            return;
-          }
-          done();
-        });
+        .end(done);
     });
 
-    it('should fail if list id is not a number', function(done) {
-      hippie(server)
-        .json()
-        .get('/todo/api/lists/InvalidId')
-        .expectStatus(400)
-        .end(function(error, response) {
-          if (error) {
-            done(error);
-            return;
-          }
-          expect(JSON.parse(response.body)).to.include(errors.IdNotAcceptable);
-          done();
-        });
+    it('should fail if list id is not a number', async function() {
+      let response = await hippie(server)
+                              .json()
+                              .get('/todo/api/lists/InvalidId')
+                              .expectStatus(400)
+                              .end();
+      expect(JSON.parse(response.body)).to.include(errors.IdNotAcceptable);
     });
 
-    it('should return the list with that id', function(done){
-      createList(server, 'test list')
-        .then(function(storedList) {
-            hippie(server)
-                  .json()
-                  .get('/todo/api/lists/' + storedList.id)
-                  .expectStatus(200)
-                  .end()
-                    .then(function(response) {
-                      let listFound = JSON.parse(response.body);
-                      expect(listFound).to.be.deep.equal(storedList);
-                      done();
-                    })
-                    .catch(done);
-        })
-        .catch(done);
+    it('should return the list with that id', async function() {
+      let storedList = await createList(server, 'test list');
+      let response = await hippie(server)
+                              .json()
+                              .get('/todo/api/lists/' + storedList.id)
+                              .expectStatus(200)
+                              .end();
+      let listFound = JSON.parse(response.body);
+      expect(listFound).to.be.deep.equal(storedList);
     });
   });
 
 
   describe('delete', function() {
-    it('should pass if list does not exist', function(done) {
-      hippie(server)
-        .json()
-        .del('/todo/api/lists/1')
-        .expectStatus(204)
-        .end(done);
+    it('should pass if list does not exist', async function() {
+      let response = await hippie(server)
+                              .json()
+                              .del('/todo/api/lists/1')
+                              .expectStatus(404)
+                              .end();
+      
+      expect(JSON.parse(response.body)).to.include(errors.ListNotFound);
     });
 
-    it('should fail if list id is not a number', function(done) {
-      hippie(server)
-        .json()
-        .del('/todo/api/lists/InvalidId')
-        .expectStatus(400)
-        .end(function(error, response) {
-          if (error) {
-            done(error);
-          } else {
-            expect(JSON.parse(response.body)).to.include(errors.IdNotAcceptable);
-            done();
-          }
-        });
+    it('should fail if list id is not a number', async function() {
+      let response = await hippie(server)
+                              .json()
+                              .del('/todo/api/lists/InvalidId')
+                              .expectStatus(400)
+                              .end();
+      expect(JSON.parse(response.body)).to.include(errors.IdNotAcceptable);
     });
 
-    it('should delete the list with that id', function(done){
-      createList(server, 'test list')
-        .then(function(storedList) {
-            hippie(server)
+    it('should delete the list with that id', async function(){
+      let storedList = await createList(server, 'test list');
+
+      await hippie(server)
                   .json()
                   .del('/todo/api/lists/' + storedList.id)
                   .expectStatus(204)
-                  .end()
-                    .then(function() {
-                      hippie(server)
-                        .json()
-                        .get('/todo/api/lists/' + storedList.id)
-                        .expectStatus(404)
-                        .end(done);
-                    })
-                    .catch(done);
-        })
-        .catch(done);
+                  .end();
+      
+      return hippie(server)
+                   .json()
+                   .get('/todo/api/lists/' + storedList.id)
+                   .expectStatus(404)
+                   .end();
     });
   });
 });
