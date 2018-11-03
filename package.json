@@ -5,7 +5,8 @@
   "main": "app/server.js",
   "scripts": {
     "test": "mocha --exit --require test/env --reporter spec --bail test/**/**.spec.js",
-    "build-image": "docker build ."
+    "build-image": "docker build .",
+    "tag-image": "cross-var docker build . -t german1410/todo-list:$npm_package_version"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
   "homepage": "https://github.com/german1410/todolist-backend#readme",
   "devDependencies": {
     "chai": "^4.2.0",
+    "cross-var": "^1.1.0",
     "hippie": "^0.5.2",
     "mocha": "^5.2.0"
   },
