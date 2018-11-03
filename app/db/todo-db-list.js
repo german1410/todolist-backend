@@ -1,8 +1,9 @@
-'use strict';
+ 'use strict';
 
 const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
+const {counterCollection} = require('./db-constants');
 const config = require('../config/todo-service-config');
 
 const todoListSchema = new mongoose.Schema({
@@ -10,26 +11,44 @@ const todoListSchema = new mongoose.Schema({
   name: {type: String, required: true, trim: true, minlength: 1}
 },
 {
-  autoCreate: config.db.autoCreate
+  autoCreate: config.db.auto_create
 });
-todoListSchema.plugin(AutoIncrement, 
-                      {id: 'todo_list_id', inc_field: 'id', collection_name: 'todo_list_counters'});
 
-const todoList = mongoose.model('todo_list', todoListSchema);
+todoListSchema.plugin(AutoIncrement, 
+                      {
+                        id: 'todo_list_id',
+                        inc_field: 'id', 
+                        collection_name: counterCollection
+                      });
+
+const todoListModel = mongoose.model('todo_list', todoListSchema);
 
 class TodoListDao {
 
-  createList(listName) {
-    return todoList.create({name: listName});
+  async createList(listName) {
+    if (!listName) {
+      throw new Error('List name was not provided and is required');
+    }
+
+    let list = await todoListModel.create({ name: listName });
+    return { list: list };
   }
 
-  findById(id) {
-    return todoList.findOne({ id: id});
+  async findById(listId) {
+    if (!listId) {
+      throw new Error('List id was not provided and is required');
+    }
+    
+    return todoListModel.findOne({ id: listId });
   }
 
-  deleteById(id) {
-    return todoList.deleteOne({ id: id});
+  async deleteById(listId) {
+    if (!listId) {
+      throw new Error('List id was not provided and is required');
+    }
+
+    return todoListModel.deleteOne({ id: listId });
   }
 }
 
-module.exports = new TodoListDao();
+module.exports.todoListDao = new TodoListDao();
