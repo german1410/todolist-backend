@@ -4,7 +4,8 @@
   "description": "REST Web Application used to keep list of TODO tasks",
   "main": "app/server.js",
   "scripts": {
-    "test": "mocha --exit --require test/env --reporter spec --bail test/**/**.spec.js"
+    "test": "mocha --exit --require test/env --reporter spec --bail test/**/**.spec.js",
+    "build-image": "docker build ."
   },
   "repository": {
     "type": "git",
