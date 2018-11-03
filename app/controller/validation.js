@@ -1,25 +1,56 @@
 'use strict';
 
+const _ = require('lodash');
 const Joi = require('joi');
 
-const listValidatorSchema = Joi.object()
+// For simplicity use the same values form DB but when changes proably a map would be better
+// to be able to modify the DB wihtout changing the service
+const dbConstants = require('../db/db-constants');
+
+const listValidator = Joi.object()
                           .keys({
                             id: Joi.any().forbidden(),
                             name: Joi.string().min(1, 'utf8').max(400, 'utf8').required()
                           })
                           .required();
                           
-const listIdValdatorSchema = Joi.number().required();
+const listIdValdator = Joi.number().required();
 
-const todoValidatorSchema = Joi.object()
+const todoDescriptionValidator = Joi.string().min(1, 'utf8').max(2000, 'utf8');
+const todoDueDateValidator = Joi.number().min(1);
+
+const todoValidator = Joi.object()
                               .keys({
                                 id: Joi.any().forbidden(),
-                                description: Joi.string().min(1, 'utf8').max(2000, 'utf8').required(),
-                                dueDate: Joi.number().min(1)
+                                description: todoDescriptionValidator.required(),
+                                due_date: todoDueDateValidator
                               })
                               .required();
 
+const todoIdValdator = Joi.number().required();
 
-module.exports.listValidatorSchema = listValidatorSchema;
-module.exports.listIdValdatorSchema = listIdValdatorSchema;
-module.exports.todoValidatorSchema = todoValidatorSchema;
+const todoPartialUpdateValidator = Joi.object()
+                                      .keys({
+                                        id: Joi.any().forbidden(),
+                                        description:todoDescriptionValidator,
+                                        due_date: todoDueDateValidator,
+                                        state: Joi.string().only(_.values(dbConstants.todoStates))
+                                      })
+                                      .or('description', 'dueDate', 'state')
+                                      .required();
+
+const resultSetQueryValidatior = Joi.object()
+                                        .keys({
+                                          index: Joi.number().min(0),
+                                          limit: Joi.number().min(1),
+                                          orderBy: Joi.string().only(_.values(dbConstants.sortBy)),
+                                          orderDirection: Joi.string().only(_.keys(dbConstants.sortDirection))
+                                        })
+                                        .with('orderDirection', ['orderBy']);
+
+module.exports.listValidator  = listValidator;
+module.exports.listIdValdator = listIdValdator;
+module.exports.todoValidator  = todoValidator;
+module.exports.todoIdValdator = todoIdValdator;
+module.exports.todoPartialUpdateValidator = todoPartialUpdateValidator;
+module.exports.resultSetQueryValidatior = resultSetQueryValidatior;
