@@ -105,22 +105,30 @@
                         }
                     },
                     {
-                        "name": "startAt",
+                        "name": "limit",
                         "in": "query",
-                        "description": "Id of the ToDo from which result are returned",
+                        "description": "Maximum number of entries to return",
                         "schema": {
                             "type": "number",
                             "format": "int32"
                         }
                     },
                     {
-                        "name": "limit",
+                        "name": "orderBy",
                         "in": "query",
-                        "description": "Maximum number of entries to return",
-                        "required": true,
+                        "description": "Define how to sort the returned todos. This will impact how index and limit are applied.",
                         "schema": {
-                            "type": "number",
-                            "format": "int32"
+                            "type": "string",
+                            "enum": ["last_update_date", "creation_date"]
+                        }
+                    },
+                    {
+                        "name": "orderDirection",
+                        "in": "query",
+                        "description": "Define how the order used for sorting the result.",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["asc", "desc"]
                         }
                     }
                 ],
@@ -130,7 +138,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ToDoListContent"
+                                    "$ref": "#/components/schemas/ToDoEntryResultSet"
                                 }
                             }
                         }
@@ -141,9 +149,6 @@
                     },
                     "404": {
                         "description": "ToDo list no longer exists"
-                    },
-                    "411": {
-                        "desciption": "Limit was not provided on the request"
                     }
                 }
             },
@@ -306,8 +311,7 @@
                         "format": "int64"
                     },
                     "state": {
-                        "type": "number",
-                        "format": "int32",
+                        "type": "string",
                         "enum": ["incomplete", "complete"]
                     },
                     "description": {
@@ -329,11 +333,20 @@
                     }
                 }
             },
-            "ToDoListContent": {
+            "ToDoEntryResultSet": {
                 "type": "object",
                 "properties": {
-                    "metadata": {
-                        "$ref": "#/components/schemas/ToDoListMeta"
+                    "first": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "last": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
                     },
                     "todos": {
                         "type": "array",
