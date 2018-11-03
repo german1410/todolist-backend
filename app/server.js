@@ -5,13 +5,12 @@ const mongoose = require('mongoose');
 
 const config = require('./config/todo-service-config');
 const configureRoutes = require('./route/routes');
-const {logger, bunyanAdaptedLogger} = require('./util/logger');
+const logger = require('./util/logger');
 
 logger.info('Start todo-list server. Configuration: ' + JSON.stringify(config));
 
 let server = restify.createServer({
-    name: 'todo-list',
-    log: bunyanAdaptedLogger
+    name: 'todo-list'
 });
 
 server.use(restify.plugins.bodyParser());
