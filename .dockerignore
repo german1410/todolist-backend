@@ -1,0 +1,7 @@
+test
+.vscode
+.gitignore
+.eslintrc
+doc
+node_modules
+kubernetes
