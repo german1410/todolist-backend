@@ -9,7 +9,7 @@ const config = require('../config/todo-service-config');
 const {todoListDao} = require('../db/todo-db-list');
 const {todoEntryDao} = require('../db/todo-db-entry');
 const errors = require('../model/errors');
-const {logger} = require('../util/logger');
+const logger = require('../util/logger');
 
 function validateListId(request) {
   let listId = request.params.listId;

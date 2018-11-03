@@ -7,7 +7,7 @@ const {listValidator, listIdValdator} = require('./validation');
 const {todoListDao} = require('../db/todo-db-list');
 const {todoEntryDao} = require('../db/todo-db-entry');
 const errors = require('../model/errors');
-const {logger} = require('../util/logger');
+const logger = require('../util/logger');
 
 
 async function createList(request, response, next) {

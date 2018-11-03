@@ -6,7 +6,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const dbConstants = require('./db-constants');
-const {logger} = require('../util/logger');
+const logger = require('../util/logger');
 
 const todoEntrySchema = new mongoose.Schema({
   id: {type: Number, index: true},
