@@ -5,7 +5,7 @@ const Joi = require('joi');
 
 // For simplicity use the same values form DB but when changes proably a map would be better
 // to be able to modify the DB wihtout changing the service
-const dbConstants = require('../db/db-constants');
+const modelConstants = require('../model/model-constants');
 
 const listValidator = Joi.object()
                           .keys({
@@ -32,9 +32,9 @@ const todoIdValdator = Joi.number().required();
 const todoPartialUpdateValidator = Joi.object()
                                       .keys({
                                         id: Joi.any().forbidden(),
-                                        description:todoDescriptionValidator,
+                                        description: todoDescriptionValidator,
                                         due_date: todoDueDateValidator,
-                                        state: Joi.string().only(_.values(dbConstants.todoStates))
+                                        state: Joi.string().only(_.values(modelConstants.todoStates))
                                       })
                                       .or('description', 'dueDate', 'state')
                                       .required();
@@ -43,8 +43,8 @@ const resultSetQueryValidatior = Joi.object()
                                         .keys({
                                           index: Joi.number().min(0),
                                           limit: Joi.number().min(1),
-                                          orderBy: Joi.string().only(_.values(dbConstants.sortBy)),
-                                          orderDirection: Joi.string().only(_.keys(dbConstants.sortDirection))
+                                          orderBy: Joi.string().only(_.values(modelConstants.sortBy)),
+                                          orderDirection: Joi.string().only(_.keys(modelConstants.sortDirection))
                                         })
                                         .with('orderDirection', ['orderBy']);
 
