@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const hippie = require('hippie');
 
-const {logger} = require('../../app/util/logger');
+const logger = require('../../app/util/logger');
 const config = require('../../app/config/todo-service-config');
 
 function createLogAndCallbackHandler(message) {
