@@ -39,7 +39,7 @@ class TodoListDao {
       throw new Error('List id was not provided and is required');
     }
     
-    return todoListModel.findOne({ id: listId });
+    return todoListModel.findOne({ id: listId }).exec();
   }
 
   async deleteById(listId) {
@@ -47,7 +47,7 @@ class TodoListDao {
       throw new Error('List id was not provided and is required');
     }
 
-    return todoListModel.deleteOne({ id: listId });
+    return todoListModel.deleteOne({ id: listId }).exec();
   }
 }
 
