@@ -8,6 +8,7 @@ const validators = require('./validation');
 const config = require('../config/todo-service-config');
 const {todoListDao} = require('../db/todo-db-list');
 const {todoEntryDao} = require('../db/todo-db-entry');
+const dbConstants = require('../db/db-constants');
 const errors = require('../model/errors');
 const logger = require('../util/logger');
 
@@ -157,27 +158,27 @@ async function deleteTodo(request, response, next) {
 
   } catch (error) {
     logger.error('deleteTodo - Error trying to delete todo: %s', error);
-    return next(new InternalServerError(`Error trying to delete todo for list ${listId}, todo id=${todoId}`,));
+    return next(new InternalServerError(`Error trying to delete todo for list ${listId}, todo id=${todoId}`));
   }
 
   return next();
 }
 
 async function getTodo(request, response, next) {
-  let validationResult = validateListId(request); 
-  if (validationResult.error) {
-    return next(validationResult.error);
-  }
-
-  validationResult = validateTodoId(request); 
-  if (validationResult.error) {
-    return next(validationResult.error);
-  } 
-
-  let listId = request.params.listId;
-  let todoId = request.params.todoId;
-
   try {
+    let validationResult = validateListId(request); 
+    if (validationResult.error) {
+      return next(validationResult.error);
+    }
+
+    validationResult = validateTodoId(request); 
+    if (validationResult.error) {
+      return next(validationResult.error);
+    } 
+
+    let listId = request.params.listId;
+    let todoId = request.params.todoId;
+
     let {todo, error} = await loadTodo(listId, todoId);
 
     if (error) {
@@ -186,63 +187,64 @@ async function getTodo(request, response, next) {
       return next(error);
     }
 
-    logger.debug('getTodo - ToDo found on list with id %d. ToDo id: %d', listId, todoId);
-    response.status(200);
-
     let responseBody = createTodoResponse(todo);
+    logger.debug('getTodo - ToDo found on list with id %d. ToDo %j', listId, todo);
+    response.status(200);
     response.send(responseBody);
   } catch (error) {
     logger.error('getTodo - Error trying to retrieve todo: %s', error);
-    return next(new InternalServerError(`Error trying to update todo for list ${listId}, todo id=${todoId}`,));
+    return next(new InternalServerError(`Error trying to update todo for list ${request.params.listId}, todo id=${request.params.todoId}`));
   }
 
   return next();
 }
 
 async function updateTodo(request, response, next) {
-  let validationResult = validateListId(request); 
-  if (validationResult.error) {
-    return next(validationResult.error);
-  }
-
-  validationResult = validateTodoId(request); 
-  if (validationResult.error) {
-    return next(validationResult.error);
-  } 
-
-  let input = request.body;
-  validationResult = Joi.validate(input, validators.todoPartialUpdateValidator);
-
-  if (validationResult.error) {
-    let error = validationResult.error;
-    logger.debug('updateTodo - Input for update invalid: %j', error);
-    let errorResponse = errors.IdNotAcceptable.withAdditionalInfo(error.details.message)
-                                              .toObject();
-    return next(new BadRequestError(errorResponse));
-  }
-
-  let listId = request.params.listId;
-  let todoId = request.params.todoId;
 
   try {
-    let {todo, error} = await loadTodo(listId, todoId);
+    let validationResult = validateListId(request); 
+    if (validationResult.error) {
+      return next(validationResult.error);
+    }
+
+    validationResult = validateTodoId(request); 
+    if (validationResult.error) {
+      return next(validationResult.error);
+    } 
+
+    let input = request.body;
+    validationResult = Joi.validate(input, validators.todoPartialUpdateValidator);
+
+    if (validationResult.error) {
+      let error = validationResult.error;
+      logger.debug('updateTodo - Input for update invalid: %j', error);
+      let errorResponse = errors.IdNotAcceptable.withAdditionalInfo(error.details.message)
+                                                .toObject();
+      return next(new BadRequestError(errorResponse));
+    }
+
+    let listId = request.params.listId;
+    let todoId = request.params.todoId;
+
+    let {list, error} = await loadList(listId);
 
     if (error) {
-      logger.error('updatetTodo - Error trying to find target ToDo with id %d on list %d: %j', 
-                   todoId, listId, error);
+      logger.error('updatetTodo - Error trying to find target ToDo list with id %d: %j', 
+                   listId, error);
       return next(error);
     }
 
     logger.debug('updatetTodo - ToDo found on list with id %d. ToDo id: %d. Proceed to update', listId, todoId);
-    let updatedTodo = sanitizeTodoUpdate(input, todo);
-    let refreshedCopy = await todoEntryDao.save(updatedTodo);
+    let partialUpdate = sanitizeTodoUpdate(input);
+    let refreshedCopy = await todoEntryDao.update(list, todoId, partialUpdate);
     
-    response.status(200);
+    logger.debug('Return updated ToDo: %j', refreshedCopy);
     let responseBody = createTodoResponse(refreshedCopy);
+    response.status(200);
     response.send(responseBody);
   } catch (error) {
     logger.error('updatetTodo - Error trying to update todo: %s', error);
-    return next(new InternalServerError(`Error trying to update todo for list ${listId}, todo id=${todoId}`,));
+    return next(new InternalServerError(`Error trying to update todo for list ${request.params.listId}, todo id=${request.params.todoId}`));
   }
 
   return next();
@@ -275,8 +277,11 @@ async function getTodos(request, response, next) {
     let index = resultSetParameters.index;
     let limit = resultSetParameters.limit;
     let orderBy = resultSetParameters.orderBy;
-    let orderDirection = resultSetParameters.orderDirection;
-    logger.debug('getTodos - Retrieve Todos from list with id %d, index: %d, limit: %d', listId, index, limit);
+    let orderDirection = resultSetParameters.orderDirection 
+                                ? dbConstants.sortDirection[resultSetParameters.orderDirection]
+                                : dbConstants.sortDirection.desc;
+    logger.debug('getTodos - Retrieve Todos from list with id %d, index: %d, limit: %d, orderBy: %s, orderDirection: %s', 
+                 listId, index, limit, orderBy, orderDirection);
     let todoList = await todoEntryDao.getTodos(list, index, limit, orderBy, orderDirection);
     logger.debug('getTodos - Generate output with Todos from list with id %d.', listId);
     response.status(200);
@@ -327,22 +332,19 @@ function createTodoResponse(todo) {
   return responseBody;
 }
 
+const allowedUpateFields = ['description', 'state' ,'due_date']; 
+
 function sanitizeTodoUpdate(input) {
+  let partialUpdate = {};
   // Snitize and drop anything that is not required
-  let partialUpdate = {
-    description: input.description,
-    state: input.state
-  };
+  let keys = _.keys(input);
+  _.forEach(keys, key => {
+    if (_.includes(allowedUpateFields, key)) {
+      partialUpdate[key] = input[key];
+    }
+  });
 
-  // Keep only thing that are not undefined
-  let todo = _.merge({}, partialUpdate);
-
-  // now include properties that can be deleted
-  if (input.keys().contains('dueDate')) {
-    todo.dueDate = input.dueDate;
-  }
-
-  return todo;
+  return partialUpdate;
 }
 
 
