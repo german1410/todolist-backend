@@ -1,23 +1,16 @@
 'use strict';
 
+// Reuse constants from the model
+const modelConstant = require('../model/model-constants');
+
 const counterCollection = 'todo_list_counters';
-
-const todoStates = {
-  Complete: 'complete', 
-  Incomplete: 'incomplete'
-};
-
-const sortBy = {
-  creation_date: 'creation_date',
-  last_update_date: 'last_update_date'
-};
 
 const sortDirection = {
   desc: -1,
   asc: 1
 };
 
-module.exports.todoStates = todoStates;
+module.exports.todoStates = modelConstant.todoStates;
 module.exports.counterCollection = counterCollection;
-module.exports.sortBy = sortBy;
+module.exports.sortBy = modelConstant.sortBy;
 module.exports.sortDirection = sortDirection;
