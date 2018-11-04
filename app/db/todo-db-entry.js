@@ -68,7 +68,7 @@ class TodoEntryDao {
     }
 
     logger.debug('Searching ToDo, list %d - ToDo id %d', list.id, todoId);
-    return todoEntryModel.findOne({ list_id: list._id, id: todoId });
+    return todoEntryModel.findOne({ list_id: list._id, id: todoId }).exec();
   }
 
   async deleteListTodos(list) {
@@ -77,7 +77,7 @@ class TodoEntryDao {
     }
 
     logger.debug('Delete all ToDo\'s from list %d', list.id);
-    await todoEntryModel.deleteMany({ list_id: list._id });
+    await todoEntryModel.deleteMany({ list_id: list._id }).exec();
   }
 
   async deleteTodo(list, todoId) {
@@ -91,16 +91,28 @@ class TodoEntryDao {
     }
 
     logger.debug('About to delete ToDo, list %d - ToDo id %d', list.id, todoId);
-    await todoEntryModel.deleteOne({ list_id: list._id, id: todoId });
+    await todoEntryModel.deleteOne({ list_id: list._id, id: todoId }).exec();
   }
 
-  async save(todo) {
-    if (_.isNil(todo)) {
-      throw new Error('Todo entry missing');
+  async update(list, todoId, partialUpdate) {
+    if (_.isNil(list)) {
+      throw new Error('Todo list missing');
     }
 
-    logger.debug('Update ToDo, list %j ', todo);
-    return todoEntryModel.update(todo);
+    if (_.isNil(partialUpdate)) {
+      throw new Error('Update document is missing');
+    }
+
+    if (_.isNil(todoId)) {
+      throw new Error('Todo entry is no an ToDo from DB, unique reference index missing');
+    }
+
+    logger.debug('Update ToDo, list %d, ToDo Id: %d using : %j', list.id, todoId, partialUpdate);
+    let criteria = {
+      list_id: list._id, 
+      id: todoId
+    };
+    return todoEntryModel.findOneAndUpdate(criteria, { $set: partialUpdate }, { new: true, override: false }).exec();
   }
 
 
@@ -113,7 +125,6 @@ class TodoEntryDao {
       throw new Error('Invalid List was provided');
     }
 
-    logger.debug('Searching ToDo, list %d', list.id);
     let options = {
       skip: index,
       limit: limit,
@@ -122,6 +133,7 @@ class TodoEntryDao {
     options.sort[sortedBy] = sortDirection;
     // Disambiguation
     options.sort['id'] = 1;
+    logger.debug('Searching ToDo, list %d, options: %j', list.id, options);
     return todoEntryModel.find({ list_id: list._id}, null, options);
   }
 
