@@ -15,7 +15,7 @@ const listValidator = Joi.object()
 const listIdValdator = Joi.number().required();
 
 const todoDescriptionValidator = Joi.string().min(1, 'utf8').max(2000, 'utf8');
-const todoDueDateValidator = Joi.number().min(1);
+const todoDueDateValidator = Joi.number().min(1).allow(null);
 
 const todoValidator = Joi.object()
                               .keys({
@@ -34,7 +34,7 @@ const todoPartialUpdateValidator = Joi.object()
                                         due_date: todoDueDateValidator,
                                         state: Joi.string().only(_.values(modelConstants.todoStates))
                                       })
-                                      .or('description', 'dueDate', 'state')
+                                      .or('description', 'due_date', 'state')
                                       .required();
 
 const resultSetQueryValidatior = Joi.object()
