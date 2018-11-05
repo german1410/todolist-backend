@@ -13,14 +13,18 @@ let todoToCreate = {
   description: 'I need to do abc task'
 };
 
-function verifyTodoOnResponse(response) {
+function verifyTodoOnResponse(response, dueDate) {
   let validator = expect(JSON.parse(response.body));
   validator.to.include(todoToCreate);
   validator.to.have.property('id').that.is.a('number');
   validator.to.have.property('creation_date').that.is.a('number');
   validator.to.have.property('last_update_date').that.is.a('number');
-  validator.not.to.have.property('due_date');
-  //validator.to.have.property('state');
+  validator.to.have.property('state');
+  if (_.isNil(dueDate)) {
+    validator.not.to.have.property('due_date');
+  } else {
+    validator.to.have.property('due_date').eql(dueDate);
+  }
 }
 
 function verifyTodoOnUpdateResponse(response, expected) {
@@ -109,6 +113,20 @@ describe('/todo/api/lists/:listId/todos', function () {
             .end();
 
       verifyTodoOnResponse(response);
+    });
+
+    it('should create a new ToDo with due date', async function() {
+      let dueDate = new Date().getTime() - 18800;
+      let todoWithDueDate = _.assign({}, todoToCreate);
+      todoWithDueDate.due_date = dueDate;
+      let response = await hippie(server)
+            .json()
+            .post(`/todo/api/lists/${storedList.id}/todos`)
+            .send(todoWithDueDate)
+            .expectStatus(201)
+            .end();
+
+      verifyTodoOnResponse(response, dueDate);
     });
   });
 
@@ -319,12 +337,13 @@ describe('/todo/api/lists/:listId/todos/:todoId', function () {
 
   describe('delete', function () {
     it('should fail if list does not exist', async function () {
-      return hippie(server)
-            .json()
-            .del('/todo/api/lists/24564545/todos/234435')
-            .send(todoToCreate)
-            .expectStatus(404)
-            .end();
+      let response = await  hippie(server)
+                              .json()
+                              .del('/todo/api/lists/24564545/todos/234435')
+                              .send(todoToCreate)
+                              .expectStatus(404)
+                              .end();
+      expect(JSON.parse(response.body)).to.include(errors.ListNotFound);
     });
 
     it('should fail if list id is not a number', async function() {
@@ -357,22 +376,31 @@ describe('/todo/api/lists/:listId/todos/:todoId', function () {
     });
 
     it('should succedd if ToDo does exist', async function() {
-      return hippie(server)
-                .json()
-                .del(`/todo/api/lists/${storedList.id}/todos/${todo.id}`)
-                .expectStatus(204)
-                .end();
+      await hippie(server)
+              .json()
+              .del(`/todo/api/lists/${storedList.id}/todos/${todo.id}`)
+              .expectStatus(204)
+              .end();
+
+      let response = await hippie(server)
+                    .json()
+                    .get(`/todo/api/lists/${storedList.id}/todos/${todo.id}`)
+                    .expectStatus(404)
+                    .end();
+      expect(JSON.parse(response.body)).to.include(errors.TodoNotFound);  
       
     });
   });
 
   describe('get', function () {
     it('should fail if list does not exist', async function () {
-      return hippie(server)
-            .json()
-            .get('/todo/api/lists/24564545/todos/234435')
-            .expectStatus(404)
-            .end();
+      let response = await hippie(server)
+                              .json()
+                              .get('/todo/api/lists/24564545/todos/234435')
+                              .expectStatus(404)
+                              .end();
+         
+        expect(JSON.parse(response.body)).to.include(errors.ListNotFound);
     });
     it('should fail if list id is not a number', async function() {
       let response = await hippie(server)
@@ -464,7 +492,7 @@ describe('/todo/api/lists/:listId/todos/:todoId', function () {
       expect(JSON.parse(response.body)).to.include(errors.TodoNotFound);      
     });
 
-    it('should partially update an existing ToDo', async function() {
+    it('should add change ToDo state', async function() {
       let response = await hippie(server)
                               .json()
                               .patch(`/todo/api/lists/${storedList.id}/todos/${todo.id}`)
@@ -476,6 +504,79 @@ describe('/todo/api/lists/:listId/todos/:todoId', function () {
 
       let expected = _.assign({}, todo);
       expected.state = modelConstants.todoStates.Complete;
+      verifyTodoOnUpdateResponse(response, expected);
+
+      response = await hippie(server)
+                          .json()
+                          .get(`/todo/api/lists/${storedList.id}/todos/${todo.id}`)
+                          .send()
+                          .expectStatus(200)
+                          .end();
+
+      verifyTodoOnUpdateResponse(response, expected);
+    });
+
+    it('should add ToDo due_date and the remote it', async function() {
+      let time = new Date().getTime();
+      let response = await hippie(server)
+                              .json()
+                              .patch(`/todo/api/lists/${storedList.id}/todos/${todo.id}`)
+                              .send({
+                                due_date: time
+                              })
+                              .expectStatus(200)
+                              .end();
+
+      let expected = _.assign({}, todo);
+      expected.due_date = time;
+      verifyTodoOnUpdateResponse(response, expected);
+
+      response = await hippie(server)
+                          .json()
+                          .get(`/todo/api/lists/${storedList.id}/todos/${todo.id}`)
+                          .send()
+                          .expectStatus(200)
+                          .end();
+
+      verifyTodoOnUpdateResponse(response, expected);
+
+      // Delete due_date
+
+      response = await hippie(server)
+                          .json()
+                          .patch(`/todo/api/lists/${storedList.id}/todos/${todo.id}`)
+                          .send({
+                            due_date: null
+                          })
+                          .expectStatus(200)
+                          .end();
+
+      expected = _.assign({}, todo);
+      delete expected['due_date'];
+      verifyTodoOnUpdateResponse(response, expected);
+
+      response = await hippie(server)
+                          .json()
+                          .get(`/todo/api/lists/${storedList.id}/todos/${todo.id}`)
+                          .send()
+                          .expectStatus(200)
+                          .end();
+
+      verifyTodoOnUpdateResponse(response, expected);
+    });
+
+    it('should add change ToDo description', async function() {
+      let response = await hippie(server)
+                              .json()
+                              .patch(`/todo/api/lists/${storedList.id}/todos/${todo.id}`)
+                              .send({
+                                description: 'Modified description'
+                              })
+                              .expectStatus(200)
+                              .end();
+
+      let expected = _.assign({}, todo);
+      expected.description = 'Modified description';
       verifyTodoOnUpdateResponse(response, expected);
 
       response = await hippie(server)
