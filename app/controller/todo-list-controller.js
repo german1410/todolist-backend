@@ -19,24 +19,25 @@ async function createList(request, response, next) {
 
   // First verify the input, then perform the operation
   let input = request.body;
-  let validationResult = Joi.validate(input, listValidator);
-
-  if (validationResult.error) {
-    logger.debug('TodoListConstroller.createList - validation error: %j', validationResult.error);
-    return handleCreateValidationError(validationResult.error, next);
-  } 
-  
-  // Only use what is relevant
-  let listName = input.name;
-  logger.debug('TodoListConstroller.createList - process request: %j', input);
   try {
+    let validationResult = Joi.validate(input, listValidator);
+
+    if (validationResult.error) {
+      logger.debug('TodoListConstroller.createList - validation error: %j', validationResult.error);
+      return handleCreateValidationError(validationResult.error, next);
+    } 
+    
+    // Only use what is relevant
+    let listName = input.name;
+    logger.debug('TodoListConstroller.createList - process request: %j', input);
+  
     // Create the new list and return only specific information
     let list = await todoListDao.createList(listName);
     response.status(201);
     return handleSuccess(list, response, next, 'TodoListConstroller.createList - New list created successfully');
   } catch (error) {
-    logger.error('TodoListConstroller.createList - Error trying to create list: %s', error);
-    return next(new InternalServerError(`Error trying to create list ${listName}`));
+    logger.error('TodoListConstroller.createList - Error trying to create list: %s. Input: %j', error, input);
+    return next(new InternalServerError('Error trying to create list'));
   }
 
 }
@@ -53,13 +54,14 @@ async function getList(request, response, next) {
   let listId = request.params.listId;
   let validationResult = Joi.validate(listId, listIdValdator);
 
-  if (validationResult.error) {
-    return next(createInvalidListIdError('getList', validationResult.error));
-  } 
-  
-  // Search for the list and returned. If list is not found, return an appropriate error
-  logger.debug('TodoListConstroller.getList - for list with id: %d', listId);
   try {
+    if (validationResult.error) {
+      return next(createInvalidListIdError('getList', validationResult.error));
+    } 
+    
+    // Search for the list and returned. If list is not found, return an appropriate error
+    logger.debug('TodoListConstroller.getList - for list with id: %d', listId);
+    
     let list = await todoListDao.findListById(listId);
 
     if (_.isNil(list)) {
@@ -69,7 +71,7 @@ async function getList(request, response, next) {
     // Format response with the list
     return handleSuccess(list, response, next, 'TodoListConstroller.getList - List found');
   } catch (error) {
-    logger.error('TodoListConstroller.getList - Error trying to retrieve list: %s', error);
+    logger.error('TodoListConstroller.getList - Error trying to retrieve list with id %d: %s', listId, error);
     return next(new InternalServerError(`Error trying to create list with id ${listId}`));
   }
 
@@ -85,15 +87,16 @@ async function deleteList(request, response, next) {
 
   // Verify the list if is valid
   let listId = request.params.listId;
-  let validationResult = Joi.validate(listId, listIdValdator);
-
-  if (validationResult.error) {
-    return next(createInvalidListIdError('deleteList', validationResult.error));
-  } 
-
-  // Check if list exist before deleting
-  logger.debug('TodoListConstroller.deleteList - trying to delete list with id: %d', listId);
   try {
+    let validationResult = Joi.validate(listId, listIdValdator);
+
+    if (validationResult.error) {
+      return next(createInvalidListIdError('deleteList', validationResult.error));
+    } 
+
+    // Check if list exist before deleting
+    logger.debug('TodoListConstroller.deleteList - trying to delete list with id: %d', listId);
+  
     let list = await todoListDao.findListById(listId);
     
     if (_.isNil(list)) {
@@ -107,7 +110,7 @@ async function deleteList(request, response, next) {
     response.send();
     return next();
   } catch (error) {
-    logger.error('TodoListConstroller.deleteList Error trying to delete list: %s', error);
+    logger.error('TodoListConstroller.deleteList Error trying to delete list with id %d: %s', listId, error);
     return next(new InternalServerError(`Error trying to delete list with id ${listId}`));
   }
 
