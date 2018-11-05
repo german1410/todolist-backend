@@ -26,7 +26,7 @@ server.on('uncaughtException', function (req, res, route, err) {
 
 // Track restify error on debug just in case trouble shoot is requried
 server.on('restifyError', function(req, res, err, callback) {
-  logger.debug('Init: Error on server: %s - %s', err.name, err.message);
+  logger.debug('Error on server: %s - %s', err.name, err.message);
   return callback();
 });
 

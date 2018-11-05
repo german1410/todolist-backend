@@ -20,7 +20,7 @@ function verifyTodoOnResponse(response) {
   validator.to.have.property('creation_date').that.is.a('number');
   validator.to.have.property('last_update_date').that.is.a('number');
   validator.not.to.have.property('due_date');
-  validator.to.have.property('state').to.be.oneOf(_.values(modelConstants.todoStates));
+  //validator.to.have.property('state');
 }
 
 function verifyTodoOnUpdateResponse(response, expected) {
@@ -223,7 +223,7 @@ describe('/todo/api/lists/:listId/todos', function () {
       this.timeout(10000);
       
       let storedTodos = await createTodosForTest();
-      storedTodos = _.orderBy(storedTodos, ['creation_date', 'id'], ['desc', 'asc']);
+      storedTodos = _.sortBy(storedTodos, ['creation_date', 'id']);
 
       let response = await hippie(server)
             .json()
@@ -240,7 +240,7 @@ describe('/todo/api/lists/:listId/todos', function () {
       this.timeout(10000);
       
       let storedTodos = await createTodosForTest();
-      storedTodos = _.orderBy(storedTodos, ['creation_date', 'id'], ['desc', 'asc']);
+      storedTodos = _.sortBy(storedTodos, ['creation_date', 'id']);
 
       let response = await hippie(server)
             .json()
@@ -261,7 +261,7 @@ describe('/todo/api/lists/:listId/todos', function () {
       this.timeout(10000);
       
       let storedTodos = await createTodosForTest();
-      storedTodos = _.orderBy(storedTodos, ['last_update_date', 'id'], ['asc', 'asc']);
+      storedTodos = _.reverse(_.sortBy(storedTodos, ['last_update_date', 'id']));
 
       let response = await hippie(server)
             .json()
@@ -346,12 +346,14 @@ describe('/todo/api/lists/:listId/todos/:todoId', function () {
       expect(JSON.parse(response.body)).to.include(errors.IdNotAcceptable);
     });
 
-    it('should succedd if ToDo does not exist', async function() {
-      return hippie(server)
-                .json()
-                .del(`/todo/api/lists/${storedList.id}/todos/233445654`)
-                .expectStatus(204)
-                .end();
+    it('should fail if ToDo does not exist', async function() {
+      let response = await hippie(server)
+                              .json()
+                              .del(`/todo/api/lists/${storedList.id}/todos/233445654`)
+                              .expectStatus(404)
+                              .end();
+      
+        expect(JSON.parse(response.body)).to.include(errors.TodoNotFound);
     });
 
     it('should succedd if ToDo does exist', async function() {
