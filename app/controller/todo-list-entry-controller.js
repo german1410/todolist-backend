@@ -49,8 +49,11 @@ async function createTodo(request, response, next) {
     // everything else is discarded
     let todoToInsert = {
       description: input.description,
-      dueDate: input.dueDate
     };
+
+    if (!_.isNil(input.due_date)) {
+      todoToInsert.due_date = new Date(input.due_date);
+    }
     let todo = await todoListDao.createTodo(listId, todoToInsert);
 
     // Fail is list does not exist
@@ -427,7 +430,7 @@ function createTodoResponse(todo) {
   };
 
   // optional values
-  if (todo.dueDate) {
+  if (!_.isNil(todo.due_date)) {
     responseBody.due_date = todo.due_date.getTime();
   }
 
@@ -453,6 +456,12 @@ function sanitizeTodoUpdate(input) {
       partialUpdate[key] = input[key];
     }
   });
+
+  // Special conversion
+  // Create a date from the due date time stamp
+  if (!_.isNil(partialUpdate.due_date)) {
+    partialUpdate.due_date = new Date(partialUpdate.due_date);
+  }
 
   return partialUpdate;
 }
