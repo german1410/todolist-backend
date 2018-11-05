@@ -1,0 +1,41 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: todo-list-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: todo-list
+    tier: rest-api
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+---    
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-list-deployment
+  labels:
+    app: todo-list
+    tier: rest-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-list
+      tier: rest-api
+  template:
+    metadata:
+      labels:
+        app: todo-list
+        tier: rest-api
+    spec:
+      containers:
+      - name: todo-list
+        image: german1410/todo-list:1.0.0
+        ports:
+        - containerPort: 8080
+        env:
+          - name: MONGO_DB_URL
+            value: "mongodb://todo-list-db-0.todo-list-db:27017/todoList"
