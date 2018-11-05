@@ -16,25 +16,32 @@ let server = restify.createServer({
 server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
+// Set up routes handed by the server
 configureRoutes(server);
 
+// Log unexpected exception 
 server.on('uncaughtException', function (req, res, route, err) {
   logger.error('uncaughtException: %s - %s', err.name, err.message);
 });
 
+// Track restify error on debug just in case trouble shoot is requried
 server.on('restifyError', function(req, res, err, callback) {
-  logger.debug('Error on server: %s - %s', err.name, err.message);
+  logger.debug('Init: Error on server: %s - %s', err.name, err.message);
   return callback();
 });
 
+// Start conneciton with mongo DB
 mongoose.connect(config.db.url);
 mongoose.connection.on('connected', function(error) {
+  // Log an throw error but keep server up so errors are returned and module can be turned off
   if (error) {
+    logger.error('Init: Error connecting to db: %s', error);
     throw error;
   }
   logger.debug('Db connected');
 });
 
+// Listent to te port for incomming requests
 server.listen(config.service.port);
 
 // Handle shutdown gracefully
