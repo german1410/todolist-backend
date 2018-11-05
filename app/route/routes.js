@@ -7,6 +7,11 @@ let listConstroller = new TodoListConstroller();
 let todoEntryController = new TodoEntryConstroller();
 
 
+/**
+ * Configures all route handlers to the service
+ * @function
+ * @param {*} server Restify server on which paths will be configured to their specific controller
+ */
 function configureRoutes(server) {
   // List management
   server.post('/todo/api/lists', listConstroller.createList);
