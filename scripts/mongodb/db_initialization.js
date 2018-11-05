@@ -1,4 +1,3 @@
-db.getCollection('todo_list_counters').drop();
 
 db.createCollection('todo_list_counters', {
     validator: { $jsonSchema: {
@@ -23,7 +22,6 @@ db.createCollection('todo_list_counters', {
 
 db.getCollection('todo_list_counters').createIndex({ field: 1, model: 1 }, { unique: true });
 
-db.getCollection('todo_lists').drop();
 db.createCollection('todo_lists', {
       validator: { $jsonSchema: {
         bsonType: "object",
