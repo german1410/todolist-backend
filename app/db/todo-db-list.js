@@ -37,7 +37,7 @@ const todoEntrySchema = new mongoose.Schema({
 const todoListSchema = new mongoose.Schema({
   id: {type: Number, index: true, unique: true},
   name: {type: String, required: true, trim: true, minlength: 1},
-  next_todo_id: { type: Number, default: 0 }, // Used to generated todo ids
+  next_todo_id: { type: Number, default: 0, required: true }, // Used to generated todo ids
   todos: [ todoEntrySchema ]
 },
 {
@@ -197,12 +197,12 @@ class TodoListDao {
     let list = await todoListModel.findOne({ id: listId}).exec();
 
     if (_.isNil(list)) {
-      return { listFound: false };
+      return { listNotFound: true };
     }
 
     let todo = list.todos.id(todoId);
     return {
-      listFound: true,
+      listNotFound: false,
       todo: todo
     };
   }

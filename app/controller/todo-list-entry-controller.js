@@ -64,7 +64,8 @@ async function createTodo(request, response, next) {
     // Process list from Db and only return information useful for the user
     return handleCreationSuccess(listId, todo.todo, response, next);
   } catch (error) {
-    logger.error('TodoEntryConstroller.createTodo - Error trying to create todo: %s', error);
+    logger.error('TodoEntryConstroller.createTodo - Error trying to create todo: %s. Input list id %d: %j', 
+                 error, request.params.listId, request.body);
     return next(new InternalServerError(`Error trying to create todo for list ${request.params.listId}`));
   }
 
@@ -116,7 +117,8 @@ async function deleteTodo(request, response, next) {
     response.send();
 
   } catch (error) {
-    logger.error('TodoEntryConstroller.deleteTodo - Error trying to delete todo: %s', error);
+    logger.error('TodoEntryConstroller.deleteTodo - Error trying to delete todo on list %d, ToDo id %d: %s',
+                  error, request.params.listId, request.params.todoId);
     return next(new InternalServerError(`Error trying to delete todo for list ${request.params.listId}, todo id=${request.params.todoId}`));
   }
 
@@ -150,9 +152,9 @@ async function getTodo(request, response, next) {
     let listId = request.params.listId;
     let todoId = request.params.todoId;
 
-    let {listFound, todo} = await todoListDao.findTodoById(listId, todoId);
+    let {listNotFound, todo} = await todoListDao.findTodoById(listId, todoId);
 
-    if (!listFound) {
+    if (listNotFound) {
       return next(createListNotFoundError('getTodo', listId));
     }
 
@@ -165,7 +167,8 @@ async function getTodo(request, response, next) {
     response.status(200);
     response.send(responseBody);
   } catch (error) {
-    logger.error('TodoEntryConstroller.getTodo - Error trying to retrieve todo: %s', error);
+    logger.error('TodoEntryConstroller.getTodo - Error trying to retrieve ToDo from list %d, ToDo id %d: %s', 
+                  error, request.params.listId, request.params.todoId);
     return next(new InternalServerError(`Error trying to update todo for list ${request.params.listId}, todo id=${request.params.todoId}`));
   }
 
@@ -206,8 +209,8 @@ async function updateTodo(request, response, next) {
     if (validationResult.error) {
       let error = validationResult.error;
       logger.debug('TodoEntryConstroller.updateTodo - Input for update invalid: %j', error);
-      let errorResponse = errors.IdNotAcceptable.withAdditionalInfo(error.details.message)
-                                                .toObject();
+      let errorResponse = errors.InvalidTodoEntry.withAdditionalInfo(error.details.message)
+                                                 .toObject();
       return next(new BadRequestError(errorResponse));
     }
 
@@ -235,7 +238,8 @@ async function updateTodo(request, response, next) {
     response.status(200);
     response.send(responseBody);
   } catch (error) {
-    logger.error('TodoEntryConstroller.updatetTodo - Error trying to update todo: %s', error);
+    logger.error('TodoEntryConstroller.updatetTodo - Error trying to update ToDo on list %d, ToDo id %d, input %j: %s', 
+                  request.params.listId, request.params.todoId, request.body, error);
     return next(new InternalServerError(`Error trying to update todo for list ${request.params.listId}, todo id=${request.params.todoId}`));
   }
 
@@ -299,7 +303,7 @@ async function getTodos(request, response, next) {
     response.send(createTodoListResponse(todoList));
 
   } catch (error) {
-    logger.error('TodoEntryConstroller.getTodos - Error trying to retrieve ToDos: %s', error);
+    logger.error('TodoEntryConstroller.getTodos - Error trying to retrieve ToDos from list: %s', listId, error);
     return next(new InternalServerError(`Error trying to retrieve ToDos from list ${listId}`,));
   }
 
