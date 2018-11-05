@@ -74,4 +74,4 @@ db.createCollection('todo_lists', {
     }
   });
 
-db.getCollection('todo_list').createIndex({ id: 1 }, { unique: true });
+db.getCollection('todo_lists').createIndex({ id: 1 }, { unique: true });
