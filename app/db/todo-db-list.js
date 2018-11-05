@@ -157,11 +157,9 @@ class TodoListDao {
             return;
           }
 
-          console.info('New date:' + JSON.stringify(entryData));
           // Include the new sequencial id generated from list metadata
           let dataWithId = _.assign( { _id: list.next_todo_id }, entryData);
           let todo = list.todos.create(dataWithId);
-          console.info('Created todo doc:' + JSON.stringify(todo));
           list.todos.push(todo);
           list.save(function (error, updatedList) {
             if (error) {
@@ -171,7 +169,6 @@ class TodoListDao {
             }
 
             let todoAfterInsert = updatedList.todos.id(dataWithId._id);
-            console.info('New date:' + JSON.stringify(todoAfterInsert));
             logger.debug('TodoListDao.createTodo: New ToDo: %j', todoAfterInsert);
             resolve({
               listNotFound: false,
