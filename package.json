@@ -4,6 +4,7 @@
   "description": "REST Web Application used to keep list of TODO tasks",
   "main": "app/server.js",
   "scripts": {
+    "start": "node app/server.js",
     "test": "mocha --exit --require test/env --reporter spec --bail test/**/**.spec.js",
     "build-image": "docker build .",
     "tag-image": "cross-var docker build . -t german1410/todo-list:$npm_package_version"

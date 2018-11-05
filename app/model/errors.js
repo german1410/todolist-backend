@@ -52,6 +52,6 @@ module.exports = {
   InvalidListName:         new TodoError('InvalidListName', 'Invalid list name'),
   ListNotFound:            new TodoError('ListNotFound',     'No list found with the provided id'),
   InvalidTodoEntry:        new TodoError('InvalidTodoEntry', 'Provided Todo entry is not valid'),
-  TodoNotFound:            new TodoError('ListNotFound',     'No ToDo found with the provided id on the list'),
+  TodoNotFound:            new TodoError('TodoNotFound',     'No ToDo found with the provided id on the list'),
   InvalidPaginationParams: new TodoError('InvalidPaginationParams',     'Provided pagination parameters are not valid'),
 };
