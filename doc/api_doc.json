@@ -202,6 +202,44 @@
             }
         },
         "/todo/api/lists/{listId}/todos/{todoId}": {
+            "get": {
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/listId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/todoId"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ToDoEntry"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ToDoEntry"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "ToDo Entry found"
+                    },
+                    "400": {
+                        "description": "Provided list id or todo id are invalid",
+                        "$ref": "#/components/response/GeneralError"
+                    },
+                    "404": {
+                        "description": "ToDo list or ToDo entry no longer exists",
+                        "$ref": "#/components/response/GeneralError"
+                    }
+                }
+            }, 
             "patch": {
                 "parameters": [
                     {
