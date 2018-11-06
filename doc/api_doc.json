@@ -1,8 +1,8 @@
 {
-    "openapi": "",
+    "openapi": "3.0.0",
     "info": {
         "title": "ToDo List Service",
-        "version": "0.0.1"
+        "version": "1.0.0"
     },
     "paths": {
         "/todo/api/lists": {
@@ -13,18 +13,12 @@
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/ToDoListMeta"
-                            },
-                            "required": [
-                                "name"
-                            ]
+                            }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
                                 "$ref": "#/components/schemas/ToDoListMeta"
-                            },
-                            "required": [
-                                "name"
-                            ]
+                            }
                         }
                     },
                     "required": true
@@ -42,7 +36,13 @@
                     },
                     "400": {
                         "description": "Provided name is not valid",
-                        "$ref": "#/components/response/GeneralError"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/responses/GeneralError"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -145,7 +145,13 @@
                     },
                     "400": {
                         "description": "Invalid request parameters",
-                        "$ref": "#/components/response/GeneralError"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/responses/GeneralError"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "ToDo list no longer exists"
@@ -163,18 +169,12 @@
                         "application/json": {
                             "schema": {
                                 "$ref": "#/components/schemas/ToDoEntry"
-                            },
-                            "required": [
-                                "description"
-                            ]
+                            }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
                                 "$ref": "#/components/schemas/ToDoEntry"
-                            },
-                            "required": [
-                                "description"
-                            ]
+                            }
                         }
                     },
                     "required": true
@@ -192,11 +192,23 @@
                     },
                     "400": {
                         "description": "Provided entry is invalid",
-                        "$ref": "#/components/response/GeneralError"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/responses/GeneralError"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "ToDo list no longer exists",
-                        "$ref": "#/components/response/GeneralError"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/responses/GeneralError"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -211,32 +223,36 @@
                         "$ref": "#/components/parameters/todoId"
                     }
                 ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ToDoEntry"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ToDoEntry"
+                "responses": {
+                    "200": {
+                        "description": "ToDo Entry found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ToDoEntry"
+                                }
                             }
                         }
                     },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "ToDo Entry found"
-                    },
                     "400": {
                         "description": "Provided list id or todo id are invalid",
-                        "$ref": "#/components/response/GeneralError"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/responses/GeneralError"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "ToDo list or ToDo entry no longer exists",
-                        "$ref": "#/components/response/GeneralError"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/responses/GeneralError"
+                                }
+                            }
+                        }
                     }
                 }
             }, 
@@ -265,16 +281,35 @@
                     "required": true
                 },
                 "responses": {
-                    "204": {
-                        "description": "ToDo Entry updated"
+                    "200": {
+                        "description": "ToDo Entry updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ToDoEntry"
+                                }
+                            }
+                        }
                     },
                     "400": {
                         "description": "Provided entry is invalid",
-                        "$ref": "#/components/response/GeneralError"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/responses/GeneralError"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "ToDo list or ToDo entry no longer exists",
-                        "$ref": "#/components/response/GeneralError"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/responses/GeneralError"
+                                }
+                            }
+                        }
                     }
                 }
             }, 
@@ -293,11 +328,23 @@
                     },
                     "400": {
                         "description": "Provided entry is invalid",
-                        "$ref": "#/components/response/GeneralError"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/responses/GeneralError"
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "description": "ToDo list or ToDo entry no longer exists",
-                        "$ref": "#/components/response/GeneralError"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/responses/GeneralError"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -338,6 +385,14 @@
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 200
+                    },
+                    "creation_date" : {
+                        "type": "number",
+                        "format": "int64"
+                    },
+                    "last_update_date" : {
+                        "type": "number",
+                        "format": "int64"
                     }
                 }
             },
@@ -397,6 +452,7 @@
         },
         "responses": {
             "GeneralError": {
+                "description": "Error information details",
                 "content": {
                     "application/json": {
                         "schema": {
