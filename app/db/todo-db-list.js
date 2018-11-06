@@ -13,7 +13,7 @@ const config = require('../config/todo-service-config');
  * Schema used to access the ToDo as subdocument of the ToDo List
  */
 const todoEntrySchema = new mongoose.Schema({
-  _id: {type: Number, index: true, unique: true, alias: 'id'},
+  _id: {type: Number, alias: 'id'},
   state: {
     type: String, 
     required: true, 
