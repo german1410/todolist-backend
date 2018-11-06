@@ -41,11 +41,15 @@ mongoose.connection.on('connected', function(error) {
   logger.debug('Db connected');
 });
 
+// Handle shutdown gracefully
+process.on('SIGTERM', shutdownService);
+process.on('SIGINT', shutdownService);
+process.on('SIGKILL', shutdownService);
+
 // Listent to te port for incomming requests
 server.listen(config.service.port);
 
-// Handle shutdown gracefully
-process.on('SIGTERM', () => {
+function shutdownService() {
   logger.info('Stoping server');
   server.close(() => {
     logger.info('Http server stopped.');
@@ -55,6 +59,6 @@ process.on('SIGTERM', () => {
       process.exit(0);
     });
   });
-});
+}
 
 module.exports = server
