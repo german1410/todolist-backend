@@ -128,3 +128,7 @@ but unfortunatelly I was not able to finish with the set up. Endpoint are:
 * **GET  _/todo/api/ready_**
 
 Probe configuratio is present on _deployment_ fileds but commented out
+
+Only basic pagination paramters are provided in orde to get ToDo's from the list.
+It should be also possible to implement result set management by adding _after_ and _before_
+parameters so pagination is not index based but based on the last element the user has.
