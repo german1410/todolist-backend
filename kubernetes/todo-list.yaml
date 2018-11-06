@@ -20,7 +20,7 @@ metadata:
     app: todo-list
     tier: rest-api
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: todo-list
@@ -35,7 +35,25 @@ spec:
       - name: todo-list
         image: german1410/todo-list:1.0.0
         ports:
-        - containerPort: 8080
+         - containerPort: 8080
         env:
           - name: MONGO_DB_URL
             value: "mongodb://todo-list-db-0.todo-list-db:27017/todoList"
+        # livenessProbe:
+        #   httpGet:
+        #     host: 127.0.0.1
+        #     path: /todo/api/health-check
+        #     port: 8080
+        #   initialDelaySeconds: 60
+        #   periodSeconds: 10
+        #   # Increse timeout for slow dev environment
+        #   timeoutSeconds: 2
+        # readinessProbe:
+        #   httpGet:
+        #     host: 127.0.0.1
+        #     path: /todo/api/ready
+        #     port: 8080
+        #   initialDelaySeconds: 60
+        #   periodSeconds: 10
+        #   # Increse timeout for slow dev environment
+        #   timeoutSeconds: 2
